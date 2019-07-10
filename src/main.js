@@ -1,4 +1,4 @@
-var data = [
+var barcodeListsData = [
     {"id": "0001", "name" : "Coca Cola", "price": 3},
     {"id": "0002", "name" : "Diet Coke", "price": 4},
     {"id": "0003", "name" : "Pepsi-Cola", "price": 5},
@@ -11,50 +11,54 @@ var data = [
     {"id": "0010", "name" : "Fanta", "price": 12}
 ];
 
-function printReceipt(barcodes) {
-
-}
-
-function isBarcodesExited(barcode) {
-    var IsExited;
-    for (var j=0;j<data.length;j++){
-        if (barcode == data[j]['id']){
-            IsExited = data[j];
+const isBarcodeExisted = (barcodeId) => {
+    let existBarcode = null;
+    for (let i = 0; i<barcodeListsData.length; i++) {
+        if(barcodeListsData[i].id === barcodeId) {
+            existBarcode = barcodeListsData[i];
             break;
+        }else{
+            existBarcode = null;
         }
-        else IsExited = null;
     }
-    return IsExited;
+    return existBarcode;
 }
 
-function createReceipts(barcodeList){
-    var exitBarcode = [];
-    var errorBarcode = [];
-    var result = '';
-    for (var i = 0;i<barcodeList.length;i++){
-        var IsExited = isBarcodesExited(barcodeList[i])
-        if (IsExited != null){
-            if (!exitBarcode[IsExited]){
-                exitBarcode[IsExited] = 1;
+const createRecipts = (batcodeList) =>{
+    let resultRecipt = '';
+    let errorBarcode = '[ERROR]:datebase not found:';
+    let errorLength = errorBarcode.length;
+    let resultList = [];
+    for(let i = 0; i<batcodeList.length; i++) {
+        let barcode = isBarcodeExists(batcodeList[i]);
+        if( barcode != null) {
+            if(resultList.length != 0) {
+                for (let i =0; i<resultList.length; i++) {
+                    if (resultList[i].key.id === barcode.id) {
+                        resultList[i].value++;
+                    }
+                }
+            }else{
+                resultList.push({key:barcode, value:1});
             }
-            else exitBarcode[barcodeList[i]]++;
+        } else {
+            errorBarcode += batcodeList[i];
         }
-        else errorBarcode.push(barcodeList[i]);
     }
-    if (errorBarcode.length>0){
-        result += '[ERROR]' + '\n';
-    }
-    result += 'Receipts' + '\n' + '-----------------------------------------------------------' + '\n';
 
-    var count=0;
-    for (var b in exitBarcode ){
-        result += b['name'] + '          ' + b['price']*exitBarcode[b] + '          ' + exitBarcode[b] + '\n';
-        count += b['price']*exitBarcode[b];
+    let sum = 0;
+    for (let i = 0; i<resultList.length; i++) {
+        resultRecipt += `${resultList[i].key.name} ${resultList[i].key.price} ${resultList[i].value}\n`;
+        sum += resultList[i].key.price * resultList[i].value;
     }
-    result += '-----------------------------------------------------------' + '\n' + 'Price:' + count;
-    return result;
+
+    if (errorBarcode.length > errorLength) {
+        return `Receipts \n------------------------------------------------------------\n${resultRecipt}\n------------------------------------------------------------\n Price:${sum}\n${errorBarcode}`;
+    }else{
+        return `Receipts \n------------------------------------------------------------\n${resultRecipt}\n------------------------------------------------------------\n Price:${sum}`;
+    }
 }
 
 module.exports ={
-    isBarcodesExited,createReceipts
+    isBarcodeExisted,createRecipts
 }
